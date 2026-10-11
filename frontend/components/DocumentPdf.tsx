@@ -58,9 +58,6 @@ const styles = StyleSheet.create({
     bottom: 32,
     left: 64,
     right: 64,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 24,
     fontSize: 7,
     lineHeight: 1.3,
     color: "#888888",
@@ -194,12 +191,11 @@ function MarkdownPage({ markdown }: { markdown: string }) {
   return (
     <Page size="LETTER" style={styles.page}>
       {root.children.map(renderBlock)}
-      <View style={styles.footer} fixed>
-        <Text style={{ flex: 1 }}>
-          Draft. {DISCLAIMER} Based on Common Paper standard terms, CC BY 4.0.
-        </Text>
-        <Text render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
-      </View>
+      {/* No page numbers: react-pdf lays out `render` text again on every page, and that second
+          pass compounds the footer's line height until long documents fail to render. */}
+      <Text style={styles.footer} fixed>
+        Draft. {DISCLAIMER} Based on Common Paper standard terms, CC BY 4.0.
+      </Text>
     </Page>
   );
 }
