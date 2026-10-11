@@ -1,52 +1,54 @@
 """Limits repeated sign-in and sign-up attempts, against password guessing and email probing.
 
-Counts are kept in memory, so they are per process and reset on restart, like the database.
+Attempts are recorded in the database, so every server process shares the same counts. Like the
+rest of the database, they are reset when the server restarts.
 """
 
-import threading
+import sqlite3
 import time
-from collections import defaultdict, deque
+from dataclasses import dataclass
 
 from fastapi import HTTPException
 
 
-class RateLimiter:
-    """Allows at most `limit` attempts per key within a sliding window of `window` seconds."""
+@dataclass(frozen=True)
+class RateLimit:
+    """At most `limit` attempts per key within a sliding window of `window` seconds."""
 
-    def __init__(self, limit: int, window: float, message: str) -> None:
-        self.limit = limit
-        self.window = window
-        self.message = message
-        self._attempts: dict[str, deque[float]] = defaultdict(deque)
-        self._lock = threading.Lock()  # endpoints run on several threadpool threads
+    scope: str
+    limit: int
+    window: float
+    message: str
 
-    def _recent(self, key: str, now: float) -> deque[float]:
-        attempts = self._attempts[key]
-        while attempts and attempts[0] <= now - self.window:
-            attempts.popleft()
-        return attempts
+    def _key(self, key: str) -> str:
+        return f"{self.scope}:{key}"
 
-    def check(self, key: str) -> None:
+    def check(self, conn: sqlite3.Connection, key: str) -> None:
         """Raises 429 if `key` has used up its attempts."""
-        with self._lock:
-            if len(self._recent(key, time.monotonic())) >= self.limit:
-                raise HTTPException(status_code=429, detail=self.message)
+        (count,) = conn.execute(
+            "SELECT COUNT(*) FROM auth_attempts WHERE key = ? AND attempted_at > ?",
+            (self._key(key), time.time() - self.window),
+        ).fetchone()
+        if count >= self.limit:
+            raise HTTPException(status_code=429, detail=self.message)
 
-    def hit(self, key: str) -> None:
-        with self._lock:
-            now = time.monotonic()
-            self._recent(key, now).append(now)
+    def hit(self, conn: sqlite3.Connection, key: str) -> None:
+        now = time.time()
+        with conn:
+            # Expired attempts are no longer needed.
+            conn.execute(
+                "DELETE FROM auth_attempts WHERE key = ? AND attempted_at <= ?", (self._key(key), now - self.window)
+            )
+            conn.execute("INSERT INTO auth_attempts (key, attempted_at) VALUES (?, ?)", (self._key(key), now))
 
-    def reset(self, key: str) -> None:
-        with self._lock:
-            self._attempts.pop(key, None)
+    def reset(self, conn: sqlite3.Connection, key: str) -> None:
+        with conn:
+            conn.execute("DELETE FROM auth_attempts WHERE key = ?", (self._key(key),))
 
 
-def login_limiter() -> RateLimiter:
-    """Failed sign-ins per email."""
-    return RateLimiter(5, 15 * 60, "Too many failed sign-in attempts. Please try again in 15 minutes.")
-
-
-def signup_limiter() -> RateLimiter:
-    """Sign-ups per client address, which also slows down probing which emails have accounts."""
-    return RateLimiter(10, 60 * 60, "Too many sign-up attempts. Please try again later.")
+# Failed sign-ins per email (including sign-ups with an existing email and a wrong password).
+FAILED_LOGINS = RateLimit(
+    "login", 5, 15 * 60, "Too many failed sign-in attempts. Please try again in 15 minutes."
+)
+# Sign-ups per client address, which also slows down probing which emails have accounts.
+SIGNUPS = RateLimit("signup", 10, 60 * 60, "Too many sign-up attempts. Please try again later.")

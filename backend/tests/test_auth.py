@@ -34,13 +34,42 @@ def test_signup_signs_the_user_in(client: TestClient, settings: Settings) -> Non
     assert PASSWORD not in stored
 
 
-def test_signup_rejects_taken_emails(client: TestClient) -> None:
-    sign_up(client, "ada@example.com")
+def test_signing_up_again_with_the_right_password_signs_in(client: TestClient, settings: Settings) -> None:
+    user = sign_up(client, "ada@example.com")
+    client.cookies.clear()
 
     response = client.post("/api/auth/signup", json={"email": "ADA@example.com", "password": PASSWORD})
 
-    assert response.status_code == 409
-    assert response.json() == {"detail": "An account with this email already exists."}
+    assert response.status_code == 200
+    assert response.json() == user
+    assert client.get("/api/auth/me").json() == user
+    with sqlite3.connect(settings.db_path) as conn:
+        assert conn.execute("SELECT COUNT(*) FROM users").fetchone()[0] == 1
+
+
+def test_signing_up_with_a_taken_email_fails_like_a_wrong_sign_in(client: TestClient) -> None:
+    sign_up(client, "ada@example.com")
+    client.cookies.clear()
+    taken = {"email": "ada@example.com", "password": "another password"}
+    unknown = {"email": "nobody@example.com", "password": "another password"}
+
+    signup = client.post("/api/auth/signup", json=taken)
+    login = client.post("/api/auth/login", json=unknown)
+
+    assert signup.status_code == login.status_code == 401
+    assert signup.json() == login.json() == {"detail": "Incorrect email or password."}
+    assert client.get("/api/auth/me").status_code == 401
+
+
+def test_password_guesses_through_signup_count_towards_the_sign_in_limit(client: TestClient) -> None:
+    sign_up(client, "ada@example.com")
+    client.cookies.clear()
+    guess = {"email": "ada@example.com", "password": "wrong password"}
+
+    statuses = [client.post("/api/auth/signup", json=guess).status_code for _ in range(3)]
+    statuses += [client.post("/api/auth/login", json=guess).status_code for _ in range(3)]
+
+    assert statuses == [401] * 5 + [429]
 
 
 @pytest.mark.parametrize(
@@ -166,16 +195,43 @@ def test_repeated_signups_are_throttled(client: TestClient) -> None:
     assert statuses == [201] * 10 + [429]
 
 
-def test_rate_limiter_window() -> None:
-    from app.ratelimit import RateLimiter
+def test_rate_limit_window(settings: Settings, monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.db import init_db
+    from app.ratelimit import RateLimit
 
-    limiter = RateLimiter(2, 0.05, "slow down")
-    limiter.hit("k")
-    limiter.hit("k")
+    init_db(settings.db_path)
+    conn = sqlite3.connect(settings.db_path)
+    limit = RateLimit("test", 2, 60, "slow down")
+    now = 1000.0
+    monkeypatch.setattr(time, "time", lambda: now)
+
+    limit.hit(conn, "k")
+    limit.hit(conn, "k")
     with pytest.raises(HTTPException):
-        limiter.check("k")
-    time.sleep(0.06)
-    limiter.check("k")  # the attempts have expired
+        limit.check(conn, "k")
+    limit.check(conn, "other")  # keys are counted separately
+
+    now += 61  # the attempts have expired
+    limit.check(conn, "k")
+    limit.hit(conn, "k")
+    assert conn.execute("SELECT COUNT(*) FROM auth_attempts").fetchone()[0] == 1  # old rows pruned
+    conn.close()
+
+
+def test_rate_limits_are_shared_by_server_processes(settings: Settings, fake_llm) -> None:
+    from app.main import create_app
+
+    # Two apps on one database stand in for two worker processes.
+    first, second = create_app(settings, llm=fake_llm), create_app(settings, llm=fake_llm)
+    with TestClient(first) as client_one:
+        sign_up(client_one)
+        wrong = {"email": "ada@example.com", "password": "wrong password"}
+        statuses = [client_one.post("/api/auth/login", json=wrong).status_code for _ in range(3)]
+        # Used without `with`, so its startup doesn't recreate the shared database.
+        client_two = TestClient(second)
+        statuses += [client_two.post("/api/auth/login", json=wrong).status_code for _ in range(3)]
+
+    assert statuses == [401] * 5 + [429]
 
 
 def test_validation_errors_do_not_echo_passwords(client: TestClient) -> None:

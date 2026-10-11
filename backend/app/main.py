@@ -12,7 +12,6 @@ from app.config import Settings
 from app.db import init_db
 from app.documents.spec import load_registry
 from app.llm import LlmClient
-from app.ratelimit import login_limiter, signup_limiter
 from app.routers import auth, catalog, chat, documents, health
 
 logger = logging.getLogger(__name__)
@@ -30,8 +29,6 @@ def create_app(settings: Settings | None = None, llm: LlmClient | None = None) -
     app.state.settings = settings
     app.state.llm = llm or LlmClient(settings.openrouter_api_key)
     app.state.registry = load_registry(settings.registry_path, settings.templates_dir)
-    app.state.login_limiter = login_limiter()
-    app.state.signup_limiter = signup_limiter()
 
     @app.exception_handler(RequestValidationError)
     async def validation_error(_: Request, error: RequestValidationError) -> JSONResponse:

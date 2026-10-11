@@ -30,7 +30,9 @@ and documents are lost on restart. Documents are drafts and are subject to legal
 Set `COOKIE_SECURE=1` when serving over HTTPS so the session cookie is only sent securely.
 
 Repeated failed sign-ins for an email (5 in 15 minutes) and sign-ups from one address (10 per hour)
-are rate limited. If a document is edited in two windows at once, the later message is rejected with
+are rate limited; the counts are kept in the database, so all server processes share them. Signing
+up with an email that already has an account doesn't reveal that: with the right password it signs
+in, otherwise it fails like a wrong sign-in (and counts towards that email's limit). If a document is edited in two windows at once, the later message is rejected with
 a prompt to reload rather than overwriting the other window's changes.
 
 ## How documents work

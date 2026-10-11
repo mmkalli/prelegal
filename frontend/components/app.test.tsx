@@ -105,7 +105,7 @@ describe("entry and authentication", () => {
     mockApi({
       ...ANONYMOUS,
       "POST /api/auth/signup": () =>
-        Response.json({ detail: "An account with this email already exists." }, { status: 409 }),
+        Response.json({ detail: "Incorrect email or password." }, { status: 401 }),
     });
     const user = userEvent.setup();
     renderWithAuth(<AuthForm mode="signup" />);
@@ -115,7 +115,7 @@ describe("entry and authentication", () => {
     await user.type(screen.getByLabelText("Password"), "correct horse");
     await user.click(screen.getByRole("button", { name: "Create account" }));
 
-    expect((await screen.findByRole("alert")).textContent).toBe("An account with this email already exists.");
+    expect((await screen.findByRole("alert")).textContent).toMatch(/couldn't create an account.*sign in instead/);
     expect(router.replace).not.toHaveBeenCalled();
     expect(screen.getAllByText(/drafts and are subject to legal review/).length).toBeGreaterThan(0);
   });

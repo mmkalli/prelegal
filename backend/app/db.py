@@ -31,6 +31,13 @@ CREATE TABLE documents (
 );
 
 CREATE INDEX documents_by_user ON documents (user_id, updated_at);
+
+CREATE TABLE auth_attempts (
+    key TEXT NOT NULL,
+    attempted_at REAL NOT NULL
+);
+
+CREATE INDEX auth_attempts_by_key ON auth_attempts (key, attempted_at);
 """
 
 

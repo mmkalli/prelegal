@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
-import { errorText, MIN_PASSWORD_LENGTH } from "@/lib/api";
+import { ApiError, errorText, MIN_PASSWORD_LENGTH } from "@/lib/api";
 import { useAuth, useRedirect } from "@/lib/auth";
 import { DISCLAIMER } from "./Disclaimer";
 import { Button } from "./ui/Button";
@@ -29,6 +29,9 @@ const COPY = {
     switchLink: { href: "/login/", label: "Sign in" },
   },
 };
+
+const SIGNUP_FAILED =
+  "We couldn't create an account with this email and password. If you already have an account, sign in instead.";
 
 const FEATURES = [
   "11 Common Paper agreements, from NDAs to cloud service and data processing agreements",
@@ -76,7 +79,10 @@ export function AuthForm({ mode }: { mode: Mode }) {
     try {
       await (mode === "login" ? signIn : signUp)(email, password);
     } catch (err) {
-      setError(errorText(err));
+      // The API doesn't say whether an email is taken; signing up again with the right password
+      // simply signs in.
+      const taken = mode === "signup" && err instanceof ApiError && err.status === 401;
+      setError(taken ? SIGNUP_FAILED : errorText(err));
       setSubmitting(false);
     }
   };

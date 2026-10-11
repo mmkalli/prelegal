@@ -14,11 +14,14 @@ from app.auth import (
     verify_password,
 )
 from app.db import get_conn
+from app.ratelimit import FAILED_LOGINS, SIGNUPS
 from app.schemas import Credentials, SignupRequest, User
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 Connection = Annotated[sqlite3.Connection, Depends(get_conn)]
+
+INCORRECT_CREDENTIALS = "Incorrect email or password."
 
 
 def _sign_in(request: Request, response: Response, conn: sqlite3.Connection, user: User) -> User:
@@ -33,35 +36,47 @@ def _sign_in(request: Request, response: Response, conn: sqlite3.Connection, use
     return user
 
 
+def _check_password(conn: sqlite3.Connection, email: str, password: str) -> User:
+    """The user with these credentials; failures count towards the email's sign-in limit."""
+    FAILED_LOGINS.check(conn, email)
+    row = conn.execute("SELECT id, email, password_hash FROM users WHERE email = ?", (email,)).fetchone()
+    # Unknown emails are checked against a dummy hash, so both failures take as long.
+    password_ok = verify_password(password, row["password_hash"] if row else DUMMY_HASH)
+    if not (row and password_ok):
+        FAILED_LOGINS.hit(conn, email)
+        raise HTTPException(status_code=401, detail=INCORRECT_CREDENTIALS)
+    FAILED_LOGINS.reset(conn, email)
+    return User(id=row["id"], email=row["email"])
+
+
 @router.post("/signup", status_code=201)
 def signup(body: SignupRequest, request: Request, response: Response, conn: Connection) -> User:
-    limiter = request.app.state.signup_limiter
+    """Creates the account and signs in.
+
+    Signing up with an email that already has an account signs in with the right password and
+    otherwise fails like a wrong sign-in, rather than announcing that the account exists.
+    """
     client = request.client.host if request.client else "unknown"
-    limiter.check(client)
-    limiter.hit(client)
-    try:
-        with conn:
-            cursor = conn.execute(
-                "INSERT INTO users (email, password_hash) VALUES (?, ?)",
-                (body.email, hash_password(body.password)),
-            )
-    except sqlite3.IntegrityError as error:
-        raise HTTPException(status_code=409, detail="An account with this email already exists.") from error
-    return _sign_in(request, response, conn, User(id=cursor.lastrowid, email=body.email))
+    SIGNUPS.check(conn, client)
+    SIGNUPS.hit(conn, client)
+    # Both paths run scrypt once (hash or verify), so they take as long.
+    if not conn.execute("SELECT 1 FROM users WHERE email = ?", (body.email,)).fetchone():
+        try:
+            with conn:
+                cursor = conn.execute(
+                    "INSERT INTO users (email, password_hash) VALUES (?, ?)",
+                    (body.email, hash_password(body.password)),
+                )
+            return _sign_in(request, response, conn, User(id=cursor.lastrowid, email=body.email))
+        except sqlite3.IntegrityError:
+            pass  # created by a concurrent request in the meantime
+    response.status_code = 200
+    return _sign_in(request, response, conn, _check_password(conn, body.email, body.password))
 
 
 @router.post("/login")
 def login(body: Credentials, request: Request, response: Response, conn: Connection) -> User:
-    limiter = request.app.state.login_limiter
-    limiter.check(body.email)
-    row = conn.execute("SELECT id, email, password_hash FROM users WHERE email = ?", (body.email,)).fetchone()
-    # Unknown emails are checked against a dummy hash, so both failures take as long.
-    password_ok = verify_password(body.password, row["password_hash"] if row else DUMMY_HASH)
-    if not (row and password_ok):
-        limiter.hit(body.email)
-        raise HTTPException(status_code=401, detail="Incorrect email or password.")
-    limiter.reset(body.email)
-    return _sign_in(request, response, conn, User(id=row["id"], email=row["email"]))
+    return _sign_in(request, response, conn, _check_password(conn, body.email, body.password))
 
 
 @router.post("/logout", status_code=204)
