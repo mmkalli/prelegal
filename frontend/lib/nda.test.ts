@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { defaultValues, fillCoverPage, formatDate, formatYears, parseYears, type NdaValues } from "./nda";
+import {
+  defaultValues,
+  documentTitle,
+  fillCoverPage,
+  formatDate,
+  formatYears,
+  parseYears,
+  pdfFileName,
+  type NdaValues,
+} from "./nda";
 import { readTemplate } from "./templates";
 
 const template = readTemplate("Mutual-NDA-coverpage.md");
@@ -106,6 +115,14 @@ describe("formatters", () => {
     expect(parseYears("1e21")).toBe(99);
     expect(parseYears("")).toBeNull();
     expect(parseYears("abc")).toBeNull();
+  });
+
+  it("builds the document title and a filesystem-safe PDF filename", () => {
+    expect(documentTitle(values)).toBe("Mutual NDA - Acme Inc. - Globex");
+    expect(documentTitle(defaultValues)).toBe("Mutual NDA");
+    expect(pdfFileName(values)).toBe("Mutual NDA - Acme Inc. - Globex.pdf");
+    const tricky = { ...values, party1: { ...values.party1, company: "A/B: \"Co\"?" }, party2: { ...values.party2, company: "X Corp." } };
+    expect(pdfFileName(tricky)).toBe("Mutual NDA - AB Co - X Corp.pdf");
   });
 
   it("pluralizes years", () => {

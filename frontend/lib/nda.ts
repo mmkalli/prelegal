@@ -87,6 +87,22 @@ export function formatDate(isoDate: string): string {
   );
 }
 
+/** Document title, e.g. "Mutual NDA - Acme Inc. - Globex". */
+export function documentTitle(values: NdaValues): string {
+  const companies = [values.party1.company, values.party2.company]
+    .map((company) => company.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+  return ["Mutual NDA", ...companies].join(" - ");
+}
+
+/** PDF filename based on the document title, without characters that filesystems reject. */
+export function pdfFileName(values: NdaValues): string {
+  const safe = documentTitle(values)
+    .replace(/[<>:"/\\|?*\u0000-\u001f]/g, "")
+    .replace(/[. ]+$/, "");
+  return `${safe}.pdf`;
+}
+
 function checkbox(checked: boolean): string {
   return checked ? "- [x]     " : "- [ ]     ";
 }

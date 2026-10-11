@@ -10,16 +10,20 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@react-pdf/renderer": "^4.9.0",
     "next": "16.4.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-markdown": "^10.1.0",
     "rehype-raw": "^7.0.0",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.5"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "^4",
     "@tailwindcss/typography": "^0.5.20",
+    "@types/mdast": "^4.0.4",
     "@types/node": "^24.19.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
