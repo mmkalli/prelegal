@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Mutual Non-Disclosure Agreement",
+    "description": "Standard Terms for a mutual NDA under which both parties may share and must protect each other's confidential information while evaluating a business relationship.",
+    "filename": "templates/Mutual-NDA.md"
+  },
+  {
+    "name": "Mutual Non-Disclosure Agreement Cover Page",
+    "description": "Cover Page for the Mutual NDA capturing the deal-specific terms: purpose, effective date, MNDA term, term of confidentiality, governing law and jurisdiction, modifications, and signatures.",
+    "filename": "templates/Mutual-NDA-coverpage.md"
+  },
+  {
+    "name": "Cloud Service Agreement",
+    "description": "Standard Terms for selling and buying cloud software and SaaS products, covering access and use, fees, confidentiality, warranties, liability limits, indemnification, and term and termination.",
+    "filename": "templates/CSA.md"
+  },
+  {
+    "name": "Service Level Agreement",
+    "description": "Standard Terms for uptime and support response commitments for a cloud service, including service credits and remedies when targets are missed; incorporated into an Order Form.",
+    "filename": "templates/SLA.md"
+  },
+  {
+    "name": "Professional Services Agreement",
+    "description": "Standard Terms for engaging a provider to perform professional services under Statements of Work, covering deliverables, fees, intellectual property, confidentiality, and liability.",
+    "filename": "templates/PSA.md"
+  },
+  {
+    "name": "Software License Agreement",
+    "description": "Standard Terms for licensing on-premise or downloadable software, covering the license grant, restrictions, fees, support, warranties, liability, and termination.",
+    "filename": "templates/Software-License-Agreement.md"
+  },
+  {
+    "name": "Data Processing Agreement",
+    "description": "Standard Terms governing how a processor handles personal data on behalf of a customer, covering GDPR and other privacy law obligations, subprocessors, security, and international data transfers.",
+    "filename": "templates/DPA.md"
+  },
+  {
+    "name": "Business Associate Agreement",
+    "description": "Standard Terms for HIPAA-compliant handling of protected health information (PHI) by a business associate on behalf of a covered entity.",
+    "filename": "templates/BAA.md"
+  },
+  {
+    "name": "AI Addendum",
+    "description": "Addendum to a commercial agreement addressing AI services, including use of customer input and output, restrictions on model training, and related obligations.",
+    "filename": "templates/AI-Addendum.md"
+  },
+  {
+    "name": "Pilot Agreement",
+    "description": "Standard Terms for a limited-time trial or pilot of a product before a full purchase, covering pilot access, restrictions, feedback, confidentiality, and liability.",
+    "filename": "templates/Pilot-Agreement.md"
+  },
+  {
+    "name": "Design Partner Agreement",
+    "description": "Standard Terms for an early-stage design partnership in which a customer gets access to a product in development in exchange for providing feedback.",
+    "filename": "templates/Design-Partner-Agreement.md"
+  },
+  {
+    "name": "Partnership Agreement",
+    "description": "Standard Terms for a business partnership between a company and a partner, covering cooperation obligations, trademark licensing for joint marketing, fees, confidentiality, and liability.",
+    "filename": "templates/Partnership-Agreement.md"
+  }
+]
