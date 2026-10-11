@@ -17,11 +17,31 @@ scripts/start-mac.sh          # or scripts/start-linux.sh / scripts/start-window
 scripts/stop-mac.sh           # or scripts/stop-linux.sh  / scripts/stop-windows.ps1
 ```
 
-The SQLite database is temporary: it is created from scratch whenever the app starts.
+Sign up with an email and password, then draft any of the 11 Common Paper agreements listed in
+`documents.json` (Mutual NDA, Cloud Service, SLA, Professional Services, Software License, DPA,
+BAA, AI Addendum, Pilot, Design Partner, Partnership) by chatting with an AI assistant (an
+OpenRouter model served by Cerebras, which needs `OPENROUTER_API_KEY` in `.env`). The assistant
+finds the right agreement, or the closest one if Prelegal can't draft what you ask for, then fills in
+the key terms. Documents are saved after every message and listed under "My documents".
 
-Sign in currently accepts any email and password (there is no authentication yet). The Mutual NDA
-is drafted by chatting with an AI assistant (an OpenRouter model served by Cerebras), which needs
-`OPENROUTER_API_KEY` in `.env`.
+The SQLite database is temporary: it is created from scratch whenever the app starts, so accounts
+and documents are lost on restart. Documents are drafts and are subject to legal review.
+
+Set `COOKIE_SECURE=1` when serving over HTTPS so the session cookie is only sent securely.
+
+Repeated failed sign-ins for an email (5 in 15 minutes) and sign-ups from one address (10 per hour)
+are rate limited. If a document is edited in two windows at once, the later message is rejected with
+a prompt to reload rather than overwriting the other window's changes.
+
+## How documents work
+
+- `documents.json` describes each agreement: its template in `templates/`, the two parties and the key
+  terms (the variables highlighted in the template). A backend test checks that every variable in
+  every template is covered.
+- The Mutual NDA has its own cover page template; the other agreements get a generated cover page
+  listing the key terms, the parties and a signature block, followed by the verbatim Standard Terms.
+- The backend owns the conversation: `POST /api/documents/{id}/chat` asks the model (Structured
+  Outputs) for a reply and the changed terms, validates and merges them, and saves the document.
 
 ## Development
 

@@ -1,4 +1,4 @@
-// Renders the filled Mutual NDA markdown as a real (text-based) PDF with @react-pdf/renderer.
+// Renders a document's markdown as a real (text-based) PDF with @react-pdf/renderer.
 // Loaded on demand when the user clicks "Download PDF", so the PDF library isn't in the page bundle.
 
 import { Document, Font, Link, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
@@ -8,6 +8,7 @@ import type { ReactNode } from "react";
 import remarkGfm from "remark-gfm";
 import remarkParse from "remark-parse";
 import { unified } from "unified";
+import { DISCLAIMER } from "./Disclaimer";
 
 // Legal text reads badly with words hyphenated across lines.
 Font.registerHyphenationCallback((word) => [word]);
@@ -17,7 +18,7 @@ const parser = unified().use(remarkParse).use(remarkGfm);
 const styles = StyleSheet.create({
   page: {
     paddingTop: 60,
-    paddingBottom: 64,
+    paddingBottom: 84,
     paddingHorizontal: 64,
     fontFamily: "Helvetica",
     fontSize: 10,
@@ -52,11 +53,26 @@ const styles = StyleSheet.create({
   tableCell: { flex: 1, paddingVertical: 6, paddingHorizontal: 4 },
   tableLabelCell: { flex: 1.3 },
   tableHeader: { fontFamily: "Helvetica-Bold" },
+  footer: {
+    position: "absolute",
+    bottom: 32,
+    left: 64,
+    right: 64,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 24,
+    fontSize: 7,
+    lineHeight: 1.3,
+    color: "#888888",
+  },
 });
+
+// The templates mark variables with <span class="coverpage_link">, "keyterms_link", "orderform_link"...
+const VARIABLE = /class="\w+_link"/;
 
 /**
  * Renders inline markdown. The templates mark variables and hints with raw HTML
- * (`<span class="coverpage_link">`, `<label>`), which arrives as separate open/close `html` nodes.
+ * (`<span class="..._link">`, `<label>`), which arrives as separate open/close `html` nodes.
  */
 function renderInline(nodes: PhrasingContent[]): ReactNode[] {
   const styleStack: Styles[string][] = [];
@@ -64,7 +80,7 @@ function renderInline(nodes: PhrasingContent[]): ReactNode[] {
   nodes.forEach((node, index) => {
     if (node.type === "html") {
       if (/^<\//.test(node.value)) styleStack.pop();
-      else if (node.value.includes('class="coverpage_link"')) styleStack.push(styles.variable);
+      else if (VARIABLE.test(node.value)) styleStack.push(styles.variable);
       else if (node.value.startsWith("<label")) styleStack.push(styles.hint);
       else if (node.value.startsWith("<span")) styleStack.push({});
       return;
@@ -178,6 +194,12 @@ function MarkdownPage({ markdown }: { markdown: string }) {
   return (
     <Page size="LETTER" style={styles.page}>
       {root.children.map(renderBlock)}
+      <View style={styles.footer} fixed>
+        <Text style={{ flex: 1 }}>
+          Draft. {DISCLAIMER} Based on Common Paper standard terms, CC BY 4.0.
+        </Text>
+        <Text render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
+      </View>
     </Page>
   );
 }
@@ -188,8 +210,8 @@ type Props = {
   standardTerms: string;
 };
 
-/** The Cover Page and the Standard Terms each start on a new page. */
-export function NdaPdf({ title, coverPage, standardTerms }: Props) {
+/** The Cover Page and the Standard Terms each start on a new page; every page notes it is a draft. */
+export function DocumentPdf({ title, coverPage, standardTerms }: Props) {
   return (
     <Document title={title} creator="Prelegal" producer="Prelegal">
       <MarkdownPage markdown={coverPage} />
