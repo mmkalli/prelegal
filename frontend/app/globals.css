@@ -1,0 +1,79 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--color-neutral-100);
+  color: var(--color-neutral-900);
+}
+
+/* Variables in the Standard Terms that refer to values on the Cover Page. */
+.nda-document .coverpage_link {
+  font-weight: 600;
+  background: var(--color-amber-100);
+  border-radius: 0.125rem;
+  padding: 0 0.125rem;
+}
+
+/* Hints from the template, e.g. "How long Confidential Information is protected". */
+.nda-document label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--color-neutral-500);
+}
+
+.nda-document td label {
+  display: inline;
+  margin-left: 0.25rem;
+}
+
+/* The Standard Terms heading is an <h2> styled to match the agreement title. */
+.nda-document .nda-terms-title {
+  font-size: 2.1428571em;
+  font-weight: 800;
+  margin-top: 0;
+}
+
+/* GFM task list checkboxes for the term options. */
+.nda-document .contains-task-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.nda-document .nda-standard-terms {
+  margin-top: 3rem;
+  border-top: 1px solid var(--color-neutral-200);
+  padding-top: 2rem;
+}
+
+@media print {
+  @page {
+    margin: 2cm;
+  }
+
+  body {
+    background: white;
+  }
+
+  .nda-document .coverpage_link {
+    background: none;
+    padding: 0;
+  }
+
+  .nda-document .nda-standard-terms {
+    break-before: page;
+    margin-top: 0;
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .nda-document table,
+  .nda-document h3 {
+    break-inside: avoid;
+    break-after: avoid;
+  }
+}
