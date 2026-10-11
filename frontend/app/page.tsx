@@ -1,9 +1,10 @@
-import { NdaCreator } from "@/components/NdaCreator";
-import { readTemplate } from "@/lib/templates";
+"use client";
 
-const coverPageTemplate = readTemplate("Mutual-NDA-coverpage.md");
-const standardTerms = readTemplate("Mutual-NDA.md");
+import { useRedirect, useUser } from "@/lib/auth";
 
+/** Entry point: sends signed-in users to the platform and everyone else to the login page. */
 export default function Home() {
-  return <NdaCreator coverPageTemplate={coverPageTemplate} standardTerms={standardTerms} />;
+  const user = useUser();
+  useRedirect(user !== undefined, user ? "/app/" : "/login/");
+  return null;
 }

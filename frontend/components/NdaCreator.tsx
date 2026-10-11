@@ -70,7 +70,7 @@ export function NdaCreator({ coverPageTemplate, standardTerms }: Props) {
               type="button"
               onClick={downloadPdf}
               disabled={downloading}
-              className="rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-70"
+              className="rounded-md bg-brand-purple px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-brand-purple/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-purple focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-70"
             >
               {downloading ? "Preparing PDF…" : "Download PDF"}
             </button>
