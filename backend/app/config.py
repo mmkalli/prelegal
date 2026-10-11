@@ -9,10 +9,12 @@ class Settings:
 
     db_path: Path
     static_dir: Path
+    openrouter_api_key: str | None = None
 
     @classmethod
     def from_env(cls) -> "Settings":
         return cls(
             db_path=Path(os.environ.get("DB_PATH", "data/prelegal.db")),
             static_dir=Path(os.environ.get("STATIC_DIR", "static")),
+            openrouter_api_key=os.environ.get("OPENROUTER_API_KEY") or None,
         )

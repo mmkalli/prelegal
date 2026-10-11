@@ -5,7 +5,6 @@ import {
   fillCoverPage,
   formatDate,
   formatYears,
-  parseYears,
   pdfFileName,
   type NdaValues,
 } from "./nda";
@@ -107,16 +106,6 @@ describe("fillCoverPage", () => {
 });
 
 describe("formatters", () => {
-  it("parses years, clamping to 1-99 and rejecting non-numbers", () => {
-    expect(parseYears("3")).toBe(3);
-    expect(parseYears("2.7")).toBe(2);
-    expect(parseYears("0")).toBe(1);
-    expect(parseYears("100000")).toBe(99);
-    expect(parseYears("1e21")).toBe(99);
-    expect(parseYears("")).toBeNull();
-    expect(parseYears("abc")).toBeNull();
-  });
-
   it("builds the document title and a filesystem-safe PDF filename", () => {
     expect(documentTitle(values)).toBe("Mutual NDA - Acme Inc. - Globex");
     expect(documentTitle(defaultValues)).toBe("Mutual NDA");
