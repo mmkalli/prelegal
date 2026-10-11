@@ -1,7 +1,8 @@
 # Prelegal frontend
 
-Next.js app for creating a Common Paper Mutual NDA. Users sign in, fill in the key terms in a form,
-see the completed agreement as a live preview, and download it as a PDF file (generated in the
+Next.js app for creating a Common Paper Mutual NDA. Users sign in and chat with an AI assistant
+(`components/ChatPanel.tsx`, backed by the API's `POST /api/chat`), which fills in the key terms.
+The completed agreement shows as a live preview and downloads as a PDF file (generated in the
 browser with @react-pdf/renderer).
 
 Routes: `/` redirects to `/login/` or `/app/`; `/login/` is the sign-in screen (a stub for now, any

@@ -5,6 +5,7 @@ description = "Prelegal API and static frontend server"
 requires-python = ">=3.13"
 dependencies = [
     "fastapi>=0.143.0",
+    "litellm>=1.105.0",
     "uvicorn[standard]>=0.54.0",
 ]
 
@@ -14,6 +15,7 @@ package = false
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+markers = ["live: calls the real LLM (skipped unless OPENROUTER_API_KEY is set)"]
 
 [dependency-groups]
 dev = [

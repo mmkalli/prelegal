@@ -3,8 +3,10 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
+from pydantic import BaseModel
 
 from app.config import Settings
+from app.llm import LlmClient, ResponseModel
 from app.main import create_app
 
 
@@ -33,4 +35,31 @@ def settings(tmp_path: Path, static_dir: Path) -> Settings:
 def client(settings: Settings) -> Iterator[TestClient]:
     # Entering the client runs the app's lifespan, which creates the database.
     with TestClient(create_app(settings)) as client:
+        yield client
+
+
+class FakeLlm(LlmClient):
+    """Returns scripted responses instead of calling the model, and records the requests."""
+
+    def __init__(self) -> None:
+        super().__init__(api_key="test-key")
+        self.responses: list[BaseModel | Exception] = []
+        self.requests: list[list[dict[str, str]]] = []
+
+    def complete(self, messages: list[dict[str, str]], response_model: type[ResponseModel]) -> ResponseModel:
+        self.requests.append(messages)
+        response = self.responses.pop(0)
+        if isinstance(response, Exception):
+            raise response
+        return response
+
+
+@pytest.fixture
+def fake_llm() -> FakeLlm:
+    return FakeLlm()
+
+
+@pytest.fixture
+def chat_client(settings: Settings, fake_llm: FakeLlm) -> Iterator[TestClient]:
+    with TestClient(create_app(settings, llm=fake_llm)) as client:
         yield client

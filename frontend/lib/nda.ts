@@ -63,16 +63,6 @@ function block(text: string, fallback = BLANK): string {
   return lines.length ? lines.join("  \n") : fallback;
 }
 
-export const MIN_YEARS = 1;
-export const MAX_YEARS = 99;
-
-/** Parses a years input, clamped to [MIN_YEARS, MAX_YEARS]; null while the text isn't a number. */
-export function parseYears(text: string): number | null {
-  const years = Number(text);
-  if (!text.trim() || !Number.isFinite(years)) return null;
-  return Math.min(MAX_YEARS, Math.max(MIN_YEARS, Math.trunc(years)));
-}
-
 export function formatYears(years: number): string {
   return `${years} year${years === 1 ? "" : "s"}`;
 }

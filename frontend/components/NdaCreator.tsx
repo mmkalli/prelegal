@@ -2,8 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { defaultValues, documentTitle, fillCoverPage, pdfFileName, type NdaValues } from "@/lib/nda";
+import { ChatPanel } from "./ChatPanel";
 import { NdaDocument } from "./NdaDocument";
-import { NdaForm } from "./NdaForm";
 
 type Props = {
   coverPageTemplate: string;
@@ -48,13 +48,15 @@ export function NdaCreator({ coverPageTemplate, standardTerms }: Props) {
 
   return (
     <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-8 px-4 py-8 lg:grid-cols-[minmax(0,26rem)_minmax(0,1fr)] print:block print:p-0">
-      <aside className="print:hidden lg:sticky lg:top-8 lg:max-h-[calc(100vh-4rem)] lg:overflow-y-auto lg:pr-2">
+      <aside className="flex h-[75vh] flex-col print:hidden lg:sticky lg:top-8 lg:h-[calc(100vh-4rem)]">
         {/* Not an <h1>: the agreement's own title is the page's main heading. */}
-        <p className="text-2xl font-semibold text-neutral-900">Mutual NDA creator</p>
-        <p className="mt-1 mb-6 text-sm text-neutral-600">
-          Fill in the key terms. The agreement on the right updates as you type.
+        <p className="text-2xl font-semibold text-brand-navy">Mutual NDA creator</p>
+        <p className="mt-1 mb-4 text-sm text-brand-gray">
+          Chat with the assistant. The agreement on the right updates as you go.
         </p>
-        <NdaForm values={values} onChange={setValues} />
+        <div className="min-h-0 flex-1">
+          <ChatPanel values={values} onValuesChange={setValues} />
+        </div>
       </aside>
 
       <main className="min-w-0">

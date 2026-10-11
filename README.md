@@ -19,7 +19,9 @@ scripts/stop-mac.sh           # or scripts/stop-linux.sh  / scripts/stop-windows
 
 The SQLite database is temporary: it is created from scratch whenever the app starts.
 
-Sign in currently accepts any email and password (there is no authentication yet).
+Sign in currently accepts any email and password (there is no authentication yet). The Mutual NDA
+is drafted by chatting with an AI assistant (an OpenRouter model served by Cerebras), which needs
+`OPENROUTER_API_KEY` in `.env`.
 
 ## Development
 
@@ -30,6 +32,9 @@ Sign in currently accepts any email and password (there is no authentication yet
   ```bash
   docker build --target test -t prelegal-test . && docker run --rm prelegal-test
   ```
+
+  Add `--env-file .env` to `docker run` to also run the live test against the real model
+  (`pytest -m live`).
 
   With [uv](https://docs.astral.sh/uv/) installed: `cd backend && uv run pytest`, and
   `uv run uvicorn app.main:create_app --factory --reload` to run the API locally.
