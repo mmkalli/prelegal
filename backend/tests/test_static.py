@@ -5,11 +5,12 @@ from fastapi.testclient import TestClient
 
 from app.config import Settings
 from app.main import create_app
+from tests.conftest import REGISTRY_PATH, TEMPLATES_DIR
 
 
 @pytest.mark.parametrize(
     ("path", "text"),
-    [("/", "entry"), ("/login/", "login page"), ("/app/", "app page")],
+    [("/", "entry"), ("/login/", "login page"), ("/documents/", "documents page"), ("/documents/edit/", "editor page")],
 )
 def test_serves_exported_pages(client: TestClient, path: str, text: str) -> None:
     response = client.get(path)
@@ -49,7 +50,12 @@ def test_does_not_serve_files_outside_static_dir(client: TestClient, tmp_path: P
 
 
 def test_runs_api_only_without_static_dir(tmp_path: Path) -> None:
-    settings = Settings(db_path=tmp_path / "prelegal.db", static_dir=tmp_path / "missing")
+    settings = Settings(
+        db_path=tmp_path / "prelegal.db",
+        static_dir=tmp_path / "missing",
+        registry_path=REGISTRY_PATH,
+        templates_dir=TEMPLATES_DIR,
+    )
 
     with TestClient(create_app(settings)) as client:
         assert client.get("/api/health").status_code == 200

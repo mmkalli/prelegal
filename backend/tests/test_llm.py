@@ -8,8 +8,10 @@ from pydantic import BaseModel
 
 from app import llm
 from app.llm import LlmClient, LlmError, LlmNotConfiguredError
-from app.nda import NdaChatTurn, apply_update, system_prompt
-from tests.test_nda import make_values
+from app.documents.prompts import fill_prompt, selection_prompt
+from app.documents.spec import Registry
+from app.documents.turns import selection_model, turn_model
+from app.documents.values import apply_update, initial_values
 
 
 class Answer(BaseModel):
@@ -102,21 +104,43 @@ def test_missing_api_key_skips_the_call(monkeypatch: pytest.MonkeyPatch) -> None
     assert calls == []
 
 
-@pytest.mark.live
-@pytest.mark.skipif(not os.environ.get("OPENROUTER_API_KEY"), reason="needs OPENROUTER_API_KEY")
-def test_live_nda_turn() -> None:
-    """Calls the real model to check that the prompt and schema work end to end."""
-    values = make_values()
-    messages = [
-        {"role": "system", "content": system_prompt(values, date(2026, 10, 11))},
-        {"role": "user", "content": "We are Acme Inc and Globex; Delaware law; it should last 2 years."},
-    ]
+live = pytest.mark.skipif(not os.environ.get("OPENROUTER_API_KEY"), reason="needs OPENROUTER_API_KEY")
 
-    turn = LlmClient(os.environ["OPENROUTER_API_KEY"]).complete(messages, NdaChatTurn)
-    result = apply_update(values, turn.updates)
+
+@pytest.mark.live
+@live
+@pytest.mark.parametrize(
+    ("request_text", "expected"),
+    [("We want to let a customer try our app for free for 3 months", "pilot"), ("I need an employment contract", None)],
+)
+def test_live_selection(registry: Registry, request_text: str, expected: str | None) -> None:
+    """Calls the real model to check that the selection prompt and schema work end to end."""
+    messages = [{"role": "system", "content": selection_prompt(registry)}, {"role": "user", "content": request_text}]
+
+    turn = LlmClient(os.environ["OPENROUTER_API_KEY"]).complete(messages, selection_model(tuple(registry)))
 
     assert turn.reply.strip()
-    assert "Delaware" in result.governingLaw
-    assert {result.party1.company, result.party2.company} == {"Acme Inc", "Globex"}
-    assert result.mndaTermType == "expires"
-    assert result.mndaTermYears == 2
+    assert turn.documentType == expected
+
+
+@pytest.mark.live
+@live
+@pytest.mark.parametrize("slug", ["mutual-nda", "csa"])
+def test_live_fill_turn(registry: Registry, slug: str) -> None:
+    """Calls the real model to check that the fill prompt and generated schema work end to end."""
+    spec = registry[slug]
+    values = initial_values(spec)
+    first, second = (party.key for party in spec.parties)
+    messages = [
+        {"role": "system", "content": fill_prompt(spec, values, date(2026, 10, 11))},
+        {"role": "user", "content": f"{first} is Acme Inc, {second} is Globex. Delaware law. It starts on 2026-11-01."},
+    ]
+
+    turn = LlmClient(os.environ["OPENROUTER_API_KEY"]).complete(messages, turn_model(spec))
+    result = apply_update(spec, values, turn.updates)
+
+    assert turn.reply.strip()
+    assert "Delaware" in result.fields["governingLaw"]
+    assert result.parties[first].company == "Acme Inc"
+    assert result.parties[second].company == "Globex"
+    assert result.fields["effectiveDate"] == "2026-11-01"

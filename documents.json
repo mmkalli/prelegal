@@ -1,0 +1,258 @@
+[
+  {
+    "slug": "mutual-nda",
+    "name": "Mutual Non-Disclosure Agreement",
+    "description": "Common Paper Mutual NDA (Version 1.0) for two parties exchanging confidential information, with a cover page for the key terms.",
+    "terms": "Mutual-NDA.md",
+    "coverPage": "Mutual-NDA-coverpage.md",
+    "parties": [
+      { "key": "party1", "label": "Party 1" },
+      { "key": "party2", "label": "Party 2" }
+    ],
+    "fields": [
+      { "key": "purpose", "label": "Purpose", "kind": "longtext", "help": "How Confidential Information may be used.", "default": "Evaluating whether to enter into a business relationship with the other party." },
+      { "key": "effectiveDate", "label": "Effective Date", "kind": "date", "help": "When the MNDA starts." },
+      { "key": "mndaTermType", "label": "MNDA Term", "kind": "choice", "options": ["expires", "untilTerminated"], "default": "expires", "help": "\"expires\": the MNDA ends after the MNDA term length; \"untilTerminated\": it continues until a party terminates it." },
+      { "key": "mndaTermYears", "label": "MNDA term length (years)", "kind": "number", "min": 1, "max": 99, "default": "1", "variables": [], "help": "Used when the MNDA Term is \"expires\"." },
+      { "key": "confidentialityTermType", "label": "Term of Confidentiality", "kind": "choice", "options": ["years", "perpetual"], "default": "years", "help": "\"years\": Confidential Information is protected for the confidentiality length (trade secrets for as long as they remain trade secrets); \"perpetual\": forever." },
+      { "key": "confidentialityTermYears", "label": "Confidentiality length (years)", "kind": "number", "min": 1, "max": 99, "default": "1", "variables": [], "help": "Used when the Term of Confidentiality is \"years\"." },
+      { "key": "governingLaw", "label": "Governing Law", "kind": "text", "help": "US state whose laws govern the MNDA, e.g. \"Delaware\"." },
+      { "key": "jurisdiction", "label": "Jurisdiction", "kind": "text", "help": "Courts that hear disputes, e.g. \"courts located in New Castle, DE\"." },
+      { "key": "modifications", "label": "MNDA Modifications", "kind": "longtext", "optional": true, "variables": [], "help": "Optional changes to the Standard Terms." }
+    ]
+  },
+  {
+    "slug": "csa",
+    "name": "Cloud Service Agreement",
+    "description": "Common Paper Cloud Service Agreement for selling and buying cloud software and SaaS products.",
+    "terms": "CSA.md",
+    "parties": [
+      { "key": "provider", "label": "Provider" },
+      { "key": "customer", "label": "Customer" }
+    ],
+    "fields": [
+      { "key": "cloudService", "label": "Cloud Service", "kind": "longtext", "variables": [], "help": "The cloud service or SaaS product the Provider offers." },
+      { "key": "effectiveDate", "label": "Effective Date", "kind": "date", "help": "When the agreement starts." },
+      { "key": "orderDate", "label": "Order Date", "kind": "date", "help": "Date of the order; often the same as the Effective Date." },
+      { "key": "subscriptionPeriod", "label": "Subscription Period", "kind": "text", "help": "Length of each subscription term, e.g. \"12 months\"." },
+      { "key": "fees", "label": "Fees", "kind": "longtext", "variables": [], "help": "Subscription fees and payment terms, e.g. \"$1,000 per month, invoiced annually, due in 30 days\"." },
+      { "key": "nonRenewalNoticeDate", "label": "Non-Renewal Notice Date", "kind": "text", "help": "Deadline for giving notice of non-renewal, e.g. \"30 days before the end of the Subscription Period\"." },
+      { "key": "technicalSupport", "label": "Technical Support", "kind": "longtext", "optional": true, "help": "Support the Provider gives, e.g. \"email support on business days\"." },
+      { "key": "dpa", "label": "DPA", "kind": "text", "optional": true, "help": "Data Processing Agreement that applies, if any." },
+      { "key": "generalCapAmount", "label": "General Cap Amount", "kind": "text", "help": "Liability cap, e.g. \"the fees paid in the 12 months before the claim\"." },
+      { "key": "providerCoveredClaims", "label": "Provider Covered Claims", "kind": "longtext", "optional": true, "help": "Third-party claims the Provider defends the Customer against (indemnity)." },
+      { "key": "customerCoveredClaims", "label": "Customer Covered Claims", "kind": "longtext", "optional": true, "help": "Third-party claims the Customer defends the Provider against (indemnity)." },
+      { "key": "governingLaw", "label": "Governing Law", "kind": "text", "help": "US state whose laws govern the agreement, e.g. \"Delaware\"." },
+      { "key": "chosenCourts", "label": "Chosen Courts", "kind": "text", "help": "Courts that hear disputes, e.g. \"the state or federal courts in New Castle County, Delaware\"." }
+    ]
+  },
+  {
+    "slug": "sla",
+    "name": "Service Level Agreement",
+    "description": "Common Paper Service Level Agreement setting uptime and support response commitments for a cloud service, with service credits.",
+    "terms": "SLA.md",
+    "parties": [
+      { "key": "provider", "label": "Provider" },
+      { "key": "customer", "label": "Customer" }
+    ],
+    "fields": [
+      { "key": "cloudService", "label": "Cloud Service", "kind": "longtext", "variables": [], "help": "The cloud service the commitments apply to." },
+      { "key": "subscriptionPeriod", "label": "Subscription Period", "kind": "text", "help": "Subscription term the SLA covers, e.g. \"12 months\"." },
+      { "key": "targetUptime", "label": "Target Uptime", "kind": "text", "optional": true, "help": "Monthly availability commitment, e.g. \"99.9%\"." },
+      { "key": "uptimeCredit", "label": "Uptime Credit", "kind": "text", "optional": true, "help": "Service credit when the Target Uptime is missed, e.g. \"5% of monthly fees\"." },
+      { "key": "targetResponseTime", "label": "Target Response Time", "kind": "text", "optional": true, "help": "Time to respond to support requests, e.g. \"4 business hours\"." },
+      { "key": "responseTimeCredit", "label": "Response Time Credit", "kind": "text", "optional": true, "help": "Service credit when the Target Response Time is missed." },
+      { "key": "supportChannel", "label": "Support Channel", "kind": "text", "help": "How the Customer requests support, e.g. \"support@provider.com\"." },
+      { "key": "scheduledDowntime", "label": "Scheduled Downtime", "kind": "text", "optional": true, "help": "Planned maintenance windows excluded from uptime, e.g. \"Sundays 2-4am UTC\"." }
+    ]
+  },
+  {
+    "slug": "psa",
+    "name": "Professional Services Agreement",
+    "description": "Common Paper Professional Services Agreement for professional services and deliverables described in Statements of Work (SOWs).",
+    "terms": "PSA.md",
+    "parties": [
+      { "key": "provider", "label": "Provider" },
+      { "key": "customer", "label": "Customer" }
+    ],
+    "fields": [
+      { "key": "effectiveDate", "label": "Effective Date", "kind": "date", "help": "When the agreement starts." },
+      { "key": "deliverables", "label": "Deliverables", "kind": "longtext", "help": "Services and deliverables in the SOW." },
+      { "key": "sowTerm", "label": "SOW Term", "kind": "text", "help": "How long the SOW lasts, e.g. \"3 months\"." },
+      { "key": "fees", "label": "Fees", "kind": "longtext", "help": "Fees for the Services, e.g. \"$15,000 fixed fee\" or \"$150 per hour\"." },
+      { "key": "paymentPeriod", "label": "Payment Period", "kind": "text", "help": "When invoices are due, e.g. \"30 days from invoice\"." },
+      { "key": "rejectionPeriod", "label": "Rejection Period", "kind": "text", "help": "Time the Customer has to reject a Deliverable, e.g. \"10 business days\"." },
+      { "key": "resubmissionPeriod", "label": "Resubmission Period", "kind": "text", "help": "Time the Provider has to fix and resubmit a rejected Deliverable." },
+      { "key": "customerObligations", "label": "Customer Obligations", "kind": "longtext", "optional": true, "help": "What the Customer must provide, e.g. access, materials, people." },
+      { "key": "timeOfAssignment", "label": "Time of Assignment", "kind": "text", "help": "When ownership of Deliverables passes to the Customer, e.g. \"upon payment in full\"." },
+      { "key": "customerPolicies", "label": "Customer Policies", "kind": "text", "optional": true, "help": "Customer policies the Provider must follow on site." },
+      { "key": "securityPolicy", "label": "Security Policy", "kind": "text", "optional": true, "help": "Security policy that applies to the Services." },
+      { "key": "dpa", "label": "DPA", "kind": "text", "optional": true, "help": "Data Processing Agreement that applies, if any." },
+      { "key": "insuranceMinimums", "label": "Insurance Minimums", "kind": "text", "optional": true, "help": "Insurance the Provider must carry." },
+      { "key": "additionalWarranties", "label": "Additional Warranties", "kind": "longtext", "optional": true, "help": "Warranties beyond the Standard Terms." },
+      { "key": "generalCapAmount", "label": "General Cap Amount", "kind": "text", "help": "Liability cap, e.g. \"the fees paid under the SOW\"." },
+      { "key": "increasedClaims", "label": "Increased Claims", "kind": "longtext", "optional": true, "help": "Claims subject to the higher Increased Cap Amount." },
+      { "key": "increasedCapAmount", "label": "Increased Cap Amount", "kind": "text", "optional": true, "help": "Higher liability cap for Increased Claims." },
+      { "key": "unlimitedClaims", "label": "Unlimited Claims", "kind": "longtext", "optional": true, "help": "Claims with no liability cap." },
+      { "key": "providerCoveredClaims", "label": "Provider Covered Claims", "kind": "longtext", "optional": true, "help": "Third-party claims the Provider defends the Customer against." },
+      { "key": "customerCoveredClaims", "label": "Customer Covered Claims", "kind": "longtext", "optional": true, "help": "Third-party claims the Customer defends the Provider against." },
+      { "key": "governingLaw", "label": "Governing Law", "kind": "text", "help": "US state whose laws govern the agreement, e.g. \"Delaware\"." },
+      { "key": "chosenCourts", "label": "Chosen Courts", "kind": "text", "help": "Courts that hear disputes." }
+    ]
+  },
+  {
+    "slug": "software-license",
+    "name": "Software License Agreement",
+    "description": "Common Paper Software License Agreement for licensing on-premise or downloadable software.",
+    "terms": "Software-License-Agreement.md",
+    "parties": [
+      { "key": "provider", "label": "Provider" },
+      { "key": "customer", "label": "Customer" }
+    ],
+    "fields": [
+      { "key": "software", "label": "Software", "kind": "longtext", "variables": [], "help": "The software being licensed." },
+      { "key": "effectiveDate", "label": "Effective Date", "kind": "date", "help": "When the agreement starts." },
+      { "key": "orderDate", "label": "Order Date", "kind": "date", "help": "Date of the order; often the same as the Effective Date." },
+      { "key": "subscriptionPeriod", "label": "Subscription Period", "kind": "text", "help": "License term, e.g. \"12 months\"." },
+      { "key": "permittedUses", "label": "Permitted Uses", "kind": "longtext", "help": "What the Customer may use the software for." },
+      { "key": "licenseLimits", "label": "License Limits", "kind": "text", "help": "Limits such as seats, devices or instances." },
+      { "key": "paymentProcess", "label": "Payment Process", "kind": "longtext", "help": "Fees and how they are paid, e.g. \"$10,000 per year, invoiced annually, due in 30 days\"." },
+      { "key": "nonRenewalNoticeDate", "label": "Non-Renewal Notice Date", "kind": "text", "help": "Deadline for giving notice of non-renewal." },
+      { "key": "warrantyPeriod", "label": "Warranty Period", "kind": "text", "help": "How long the software warranty lasts, e.g. \"90 days\"." },
+      { "key": "deletionProcedure", "label": "Deletion Procedure", "kind": "text", "help": "How the Customer removes the software when the license ends." },
+      { "key": "additionalWarranties", "label": "Additional Warranties", "kind": "longtext", "optional": true, "help": "Warranties beyond the Standard Terms." },
+      { "key": "generalCapAmount", "label": "General Cap Amount", "kind": "text", "help": "Liability cap, e.g. \"the fees paid in the 12 months before the claim\"." },
+      { "key": "increasedClaims", "label": "Increased Claims", "kind": "longtext", "optional": true, "help": "Claims subject to the higher Increased Cap Amount." },
+      { "key": "increasedCapAmount", "label": "Increased Cap Amount", "kind": "text", "optional": true, "help": "Higher liability cap for Increased Claims." },
+      { "key": "unlimitedClaims", "label": "Unlimited Claims", "kind": "longtext", "optional": true, "help": "Claims with no liability cap." },
+      { "key": "providerCoveredClaims", "label": "Provider Covered Claims", "kind": "longtext", "optional": true, "help": "Third-party claims the Provider defends the Customer against." },
+      { "key": "customerCoveredClaims", "label": "Customer Covered Claims", "kind": "longtext", "optional": true, "help": "Third-party claims the Customer defends the Provider against." },
+      { "key": "governingLaw", "label": "Governing Law", "kind": "text", "help": "US state whose laws govern the agreement, e.g. \"Delaware\"." },
+      { "key": "chosenCourts", "label": "Chosen Courts", "kind": "text", "help": "Courts that hear disputes." }
+    ]
+  },
+  {
+    "slug": "dpa",
+    "name": "Data Processing Agreement",
+    "description": "Common Paper Data Processing Agreement for processing personal data under GDPR and similar privacy laws, including EU and UK transfer terms.",
+    "terms": "DPA.md",
+    "parties": [
+      { "key": "provider", "label": "Provider" },
+      { "key": "customer", "label": "Customer" }
+    ],
+    "fields": [
+      { "key": "agreement", "label": "Agreement", "kind": "text", "help": "The main agreement this DPA supplements, e.g. \"Cloud Service Agreement dated October 1, 2026\"." },
+      { "key": "natureAndPurposeOfProcessing", "label": "Nature and Purpose of Processing", "kind": "longtext", "help": "What the Provider does with the personal data and why." },
+      { "key": "categoriesOfPersonalData", "label": "Categories of Personal Data", "kind": "longtext", "help": "E.g. names, email addresses, usage data." },
+      { "key": "categoriesOfDataSubjects", "label": "Categories of Data Subjects", "kind": "longtext", "help": "E.g. the Customer's employees and end users." },
+      { "key": "specialCategoryData", "label": "Special Category Data", "kind": "longtext", "optional": true, "help": "Sensitive data (health, biometrics, ...), if any." },
+      { "key": "specialCategoryDataRestrictions", "label": "Special Category Data Restrictions or Safeguards", "kind": "longtext", "optional": true, "help": "Extra safeguards for Special Category Data." },
+      { "key": "frequencyOfTransfer", "label": "Frequency of Transfer", "kind": "text", "help": "E.g. \"continuous\" or \"one-off\"." },
+      { "key": "durationOfProcessing", "label": "Duration of Processing", "kind": "text", "help": "E.g. \"for the term of the Agreement\"." },
+      { "key": "approvedSubprocessors", "label": "Approved Subprocessors", "kind": "longtext", "optional": true, "help": "Subprocessors the Customer approves, e.g. hosting providers." },
+      { "key": "providerSecurityContact", "label": "Provider Security Contact", "kind": "text", "help": "Who to contact about security incidents, e.g. \"security@provider.com\"." },
+      { "key": "securityPolicy", "label": "Security Policy", "kind": "text", "help": "The Provider's security measures or policy." },
+      { "key": "governingMemberState", "label": "Governing Member State", "kind": "text", "help": "EU member state whose law governs the transfer clauses, e.g. \"Ireland\"." }
+    ]
+  },
+  {
+    "slug": "baa",
+    "name": "Business Associate Agreement",
+    "description": "Common Paper Business Associate Agreement for handling protected health information (PHI) under HIPAA.",
+    "terms": "BAA.md",
+    "parties": [
+      { "key": "provider", "label": "Provider" },
+      { "key": "company", "label": "Company" }
+    ],
+    "fields": [
+      { "key": "agreement", "label": "Agreement", "kind": "text", "help": "The underlying services agreement, e.g. \"Cloud Service Agreement dated October 1, 2026\"." },
+      { "key": "baaEffectiveDate", "label": "BAA Effective Date", "kind": "date", "help": "When the BAA starts." },
+      { "key": "breachNotificationPeriod", "label": "Breach Notification Period", "kind": "text", "help": "How quickly the Provider reports a breach, e.g. \"5 business days\"." },
+      { "key": "limitations", "label": "Limitations", "kind": "longtext", "optional": true, "help": "Restrictions on using or disclosing PHI, e.g. no offshoring or de-identification." }
+    ]
+  },
+  {
+    "slug": "ai-addendum",
+    "name": "AI Addendum",
+    "description": "Common Paper AI Addendum adding AI-specific terms (training on customer data, inputs and outputs) to a commercial agreement.",
+    "terms": "AI-Addendum.md",
+    "parties": [
+      { "key": "provider", "label": "Provider" },
+      { "key": "customer", "label": "Customer" }
+    ],
+    "fields": [
+      { "key": "agreement", "label": "Agreement", "kind": "text", "variables": [], "help": "The commercial agreement this addendum supplements." },
+      { "key": "trainingData", "label": "Training Data", "kind": "longtext", "optional": true, "help": "Customer data the Provider may use to train models; if none, training is not allowed." },
+      { "key": "trainingPurposes", "label": "Training Purposes", "kind": "longtext", "optional": true, "help": "What that training may be used for." },
+      { "key": "trainingRestrictions", "label": "Training Restrictions", "kind": "longtext", "optional": true, "help": "Limits on training." },
+      { "key": "improvementRestrictions", "label": "Improvement Restrictions", "kind": "longtext", "optional": true, "help": "Limits on using inputs and outputs to improve the product." }
+    ]
+  },
+  {
+    "slug": "pilot",
+    "name": "Pilot Agreement",
+    "description": "Common Paper Pilot Agreement for short-term trials and proofs of concept of a product.",
+    "terms": "Pilot-Agreement.md",
+    "parties": [
+      { "key": "provider", "label": "Provider" },
+      { "key": "customer", "label": "Customer" }
+    ],
+    "fields": [
+      { "key": "product", "label": "Product", "kind": "longtext", "variables": [], "help": "The product being piloted." },
+      { "key": "effectiveDate", "label": "Effective Date", "kind": "date", "help": "When the pilot starts." },
+      { "key": "pilotPeriod", "label": "Pilot Period", "kind": "text", "help": "How long the pilot runs, e.g. \"3 months\"." },
+      { "key": "fees", "label": "Fees", "kind": "text", "optional": true, "variables": [], "help": "Pilot fees, if any." },
+      { "key": "generalCapAmount", "label": "General Cap Amount", "kind": "text", "help": "Liability cap, e.g. \"$10,000\"." },
+      { "key": "governingLaw", "label": "Governing Law", "kind": "text", "help": "US state whose laws govern the agreement, e.g. \"Delaware\"." },
+      { "key": "chosenCourts", "label": "Chosen Courts", "kind": "text", "help": "Courts that hear disputes." }
+    ]
+  },
+  {
+    "slug": "design-partner",
+    "name": "Design Partner Agreement",
+    "description": "Common Paper Design Partner Agreement for early product access in exchange for feedback.",
+    "terms": "Design-Partner-Agreement.md",
+    "parties": [
+      { "key": "provider", "label": "Provider" },
+      { "key": "partner", "label": "Partner" }
+    ],
+    "fields": [
+      { "key": "product", "label": "Product", "kind": "longtext", "variables": [], "help": "The product the design partner gets early access to." },
+      { "key": "program", "label": "Program", "kind": "longtext", "help": "What the design partner program involves, e.g. monthly feedback sessions." },
+      { "key": "effectiveDate", "label": "Effective Date", "kind": "date", "help": "When the agreement starts." },
+      { "key": "term", "label": "Term", "kind": "text", "help": "How long the agreement lasts, e.g. \"6 months\"." },
+      { "key": "fees", "label": "Fees", "kind": "text", "optional": true, "help": "Fees, if any (often none)." },
+      { "key": "governingLaw", "label": "Governing Law", "kind": "text", "help": "US state whose laws govern the agreement, e.g. \"Delaware\"." },
+      { "key": "chosenCourts", "label": "Chosen Courts", "kind": "text", "help": "Courts that hear disputes." }
+    ]
+  },
+  {
+    "slug": "partnership",
+    "name": "Partnership Agreement",
+    "description": "Common Paper Partnership Agreement for business partnerships such as referral, reseller or co-marketing arrangements.",
+    "terms": "Partnership-Agreement.md",
+    "parties": [
+      { "key": "company", "label": "Company" },
+      { "key": "partner", "label": "Partner" }
+    ],
+    "fields": [
+      { "key": "obligations", "label": "Obligations", "kind": "longtext", "help": "What each party will do in the partnership." },
+      { "key": "effectiveDate", "label": "Effective Date", "kind": "date", "help": "When the partnership starts." },
+      { "key": "endDate", "label": "End Date", "kind": "date", "optional": true, "help": "When the partnership ends, if fixed." },
+      { "key": "territory", "label": "Territory", "kind": "text", "help": "Where trademarks may be used, e.g. \"worldwide\" or \"United States\"." },
+      { "key": "paymentProcess", "label": "Payment Process", "kind": "longtext", "optional": true, "help": "How fees are billed, if any." },
+      { "key": "paymentSchedule", "label": "Payment Schedule", "kind": "text", "optional": true, "help": "When payments are due." },
+      { "key": "brandGuidelines", "label": "Brand Guidelines", "kind": "text", "optional": true, "help": "Brand guidelines each party must follow." },
+      { "key": "dpa", "label": "DPA", "kind": "text", "optional": true, "help": "Data Processing Agreement that applies, if any." },
+      { "key": "additionalWarranties", "label": "Additional Warranties", "kind": "longtext", "optional": true, "help": "Warranties beyond the Standard Terms." },
+      { "key": "generalCapAmount", "label": "General Cap Amount", "kind": "text", "help": "Liability cap." },
+      { "key": "increasedClaims", "label": "Increased Claims", "kind": "longtext", "optional": true, "help": "Claims subject to the higher Increased Cap Amount." },
+      { "key": "increasedCapAmount", "label": "Increased Cap Amount", "kind": "text", "optional": true, "help": "Higher liability cap for Increased Claims." },
+      { "key": "unlimitedClaims", "label": "Unlimited Claims", "kind": "longtext", "optional": true, "help": "Claims with no liability cap." },
+      { "key": "companyCoveredClaims", "label": "Company Covered Claims", "kind": "longtext", "optional": true, "help": "Third-party claims the Company defends the Partner against." },
+      { "key": "partnerCoveredClaims", "label": "Partner Covered Claims", "kind": "longtext", "optional": true, "help": "Third-party claims the Partner defends the Company against." },
+      { "key": "governingLaw", "label": "Governing Law", "kind": "text", "help": "US state whose laws govern the agreement, e.g. \"Delaware\"." },
+      { "key": "chosenCourts", "label": "Chosen Courts", "kind": "text", "help": "Courts that hear disputes." }
+    ]
+  }
+]

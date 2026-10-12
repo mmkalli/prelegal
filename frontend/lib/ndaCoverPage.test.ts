@@ -1,40 +1,42 @@
 import { describe, expect, it } from "vitest";
-import {
-  defaultValues,
-  documentTitle,
-  fillCoverPage,
-  formatDate,
-  formatYears,
-  pdfFileName,
-  type NdaValues,
-} from "./nda";
-import { readTemplate } from "./templates";
+import { initialValues, readTemplate, spec } from "@/test/fixtures";
+import { fillNdaCoverPage } from "./ndaCoverPage";
+import type { DocumentValues } from "./types";
 
 const template = readTemplate("Mutual-NDA-coverpage.md");
+const defaults = initialValues(spec("mutual-nda"));
 
-const values: NdaValues = {
-  ...defaultValues,
-  purpose: "Exploring a joint venture.",
-  effectiveDate: "2026-10-11",
-  governingLaw: "Delaware",
-  jurisdiction: "courts located in New Castle, DE",
-  modifications: "Section 5 does not apply.",
-  party1: { name: "Ada Lovelace", title: "CEO", company: "Acme Inc.", noticeAddress: "ada@acme.com" },
-  party2: { name: "Alan Turing", title: "CTO", company: "Globex", noticeAddress: "alan@globex.com" },
-};
+function nda(fields: Record<string, string> = {}, parties: Partial<DocumentValues["parties"]> = {}): DocumentValues {
+  return {
+    fields: {
+      ...defaults.fields,
+      purpose: "Exploring a joint venture.",
+      effectiveDate: "2026-10-11",
+      governingLaw: "Delaware",
+      jurisdiction: "courts located in New Castle, DE",
+      modifications: "Section 5 does not apply.",
+      ...fields,
+    },
+    parties: {
+      party1: { name: "Ada Lovelace", title: "CEO", company: "Acme Inc.", noticeAddress: "ada@acme.com" },
+      party2: { name: "Alan Turing", title: "CTO", company: "Globex", noticeAddress: "alan@globex.com" },
+      ...parties,
+    } as DocumentValues["parties"],
+  };
+}
 
 /** Removes markdown backslash escapes so assertions can use plain text. */
 const unescape = (markdown: string) => markdown.replace(/\\(.)/g, "$1");
 
-describe("fillCoverPage", () => {
+describe("fillNdaCoverPage", () => {
   it("fills every placeholder in the template", () => {
-    const filled = fillCoverPage(template, values);
+    const filled = fillNdaCoverPage(template, nda());
     expect(filled).not.toMatch(/\[Fill in|\[Today’s date\]|\[1 year\(s\)\]|List any modifications/);
     expect(filled).not.toContain("[Evaluating whether");
   });
 
-  it("inserts the user's values", () => {
-    const filled = unescape(fillCoverPage(template, values));
+  it("inserts the values", () => {
+    const filled = unescape(fillNdaCoverPage(template, nda()));
     expect(filled).toContain("Exploring a joint venture.");
     expect(filled).toContain("October 11, 2026");
     expect(filled).toContain("Governing Law: Delaware");
@@ -47,11 +49,7 @@ describe("fillCoverPage", () => {
   });
 
   it("checks the fixed-term options with the chosen number of years", () => {
-    const filled = fillCoverPage(template, {
-      ...values,
-      mndaTermYears: 2,
-      confidentialityTermYears: 3,
-    });
+    const filled = fillNdaCoverPage(template, nda({ mndaTermYears: "2", confidentialityTermYears: "3" }));
     expect(filled).toContain("- [x]     Expires 2 years from Effective Date.");
     expect(filled).toContain("- [ ]     Continues until terminated");
     expect(filled).toContain("- [x]     3 years from Effective Date, but in the case of trade secrets");
@@ -59,11 +57,10 @@ describe("fillCoverPage", () => {
   });
 
   it("checks the open-ended options", () => {
-    const filled = fillCoverPage(template, {
-      ...values,
-      mndaTermType: "untilTerminated",
-      confidentialityTermType: "perpetual",
-    });
+    const filled = fillNdaCoverPage(
+      template,
+      nda({ mndaTermType: "untilTerminated", confidentialityTermType: "perpetual" }),
+    );
     expect(filled).toContain("- [ ]     Expires 1 year from Effective Date.");
     expect(filled).toContain("- [x]     Continues until terminated");
     expect(filled).toContain("- [ ]     1 year from Effective Date, but in the case of trade secrets");
@@ -71,56 +68,38 @@ describe("fillCoverPage", () => {
   });
 
   it("shows fill-in blanks for missing values and 'None.' for no modifications", () => {
-    const filled = fillCoverPage(template, defaultValues);
+    const filled = fillNdaCoverPage(template, defaults);
     expect(filled).toContain("Governing Law: \\_\\_\\_");
     expect(filled).toContain("None.");
     expect(filled).toContain("| Print Name |  |  |");
   });
 
-  it("escapes markdown and HTML in user input", () => {
-    const filled = fillCoverPage(template, {
-      ...values,
-      governingLaw: "<script>alert(1)</script>",
-      party1: { ...values.party1, name: "a | b **c**" },
-    });
+  it("escapes markdown and HTML in values", () => {
+    const filled = fillNdaCoverPage(
+      template,
+      nda({ governingLaw: "<script>alert(1)</script>" }, {
+        party1: { name: "a | b **c**", title: "", company: "", noticeAddress: "" },
+      }),
+    );
     expect(filled).not.toContain("<script>");
     expect(filled).toContain("\\<script\\>");
     expect(filled).toContain("a \\| b \\*\\*c\\*\\*");
   });
 
   it("keeps line breaks in multi-line fields but collapses them in single-line ones", () => {
-    const filled = fillCoverPage(template, {
-      ...values,
-      modifications: "First change.\n\nSecond change.",
-      party1: { ...values.party1, noticeAddress: "1 Main St\nSpringfield" },
-    });
+    const filled = fillNdaCoverPage(
+      template,
+      nda({ modifications: "First change.\n\nSecond change." }, {
+        party1: { name: "", title: "", company: "", noticeAddress: "1 Main St\nSpringfield" },
+      }),
+    );
     expect(filled).toContain("First change\\.  \nSecond change\\.");
     expect(filled).toContain("1 Main St Springfield");
   });
 
   it("throws if the template no longer contains an expected placeholder", () => {
-    expect(() => fillCoverPage(template.replace("[Fill in state]", "[State]"), values)).toThrow(
+    expect(() => fillNdaCoverPage(template.replace("[Fill in state]", "[State]"), nda())).toThrow(
       /missing expected text/,
     );
-  });
-});
-
-describe("formatters", () => {
-  it("builds the document title and a filesystem-safe PDF filename", () => {
-    expect(documentTitle(values)).toBe("Mutual NDA - Acme Inc. - Globex");
-    expect(documentTitle(defaultValues)).toBe("Mutual NDA");
-    expect(pdfFileName(values)).toBe("Mutual NDA - Acme Inc. - Globex.pdf");
-    const tricky = { ...values, party1: { ...values.party1, company: "A/B: \"Co\"?" }, party2: { ...values.party2, company: "X Corp." } };
-    expect(pdfFileName(tricky)).toBe("Mutual NDA - AB Co - X Corp.pdf");
-  });
-
-  it("pluralizes years", () => {
-    expect(formatYears(1)).toBe("1 year");
-    expect(formatYears(5)).toBe("5 years");
-  });
-
-  it("formats ISO dates without timezone shifts and ignores invalid input", () => {
-    expect(formatDate("2026-01-01")).toBe("January 1, 2026");
-    expect(formatDate("")).toBe("");
   });
 });
